@@ -15,7 +15,12 @@ namespace WeatherApp.Models
         public string Country { get; set; }
         public string City { get; set; }
 
+        public ICollection<Role> Roles { get; set; }
 
+        public User()
+        {
+            Roles = new List<Role>();
+        }
 
     }
 }

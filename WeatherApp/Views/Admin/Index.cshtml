@@ -1,0 +1,56 @@
+﻿@model List<WeatherApp.ViewModels.UserViewModel>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<table class="table col-md-10 table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>
+            Name
+        </th>
+        <th>
+            Surname
+        </th>
+        <th>
+            Country
+        </th>
+        <th>
+            City
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Surname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Country)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.City)
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2"></div>
+                    <a class="btn btn-primary" id="deleteBtn" href="#">Delete User</a>
+                    <a class="offset-1 btn btn-primary" id="getWeather" href="#">Get user weather</a>
+                    <a class="offset-1 btn btn-primary" id="makeAdminBtn" href="#">Make this user admin</a>
+        </div>
+    </div>
+
+</div>
