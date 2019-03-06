@@ -7,9 +7,9 @@
 
 <h2>Login</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
+    <p id="results"></p>    
+
+@Html.AntiForgeryToken()
     <div class="form-horizontal">
         <hr />
         <div class="form-group">
@@ -30,8 +30,30 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Login" class="btn btn-primary" />
+                <input type="submit" value="Login" class="btn btn-primary" id="submitBtn"/>
             </div>
         </div>
     </div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(function() {
+            $("#submitBtn").click(function() {
+                var loginViewModel = {
+                    Email: $("#Email").val(),
+                    Password: $("#Password").val()
+                };
+
+                $.ajax({
+                    url: "Account/Login",
+                    type: "POST",
+                    data: loginViewModel,
+                    success: function(data) {
+                        $("#results").html(data);
+                    }
+            });
+        });
+        });
+    </script>
 }

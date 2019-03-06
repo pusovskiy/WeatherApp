@@ -1,9 +1,54 @@
-﻿@model WeatherApp.Models.User
+﻿@model WeatherApp.ViewModels.UserViewModel
 
 @{
     ViewBag.Title = "UserProfile";
 }
 
 <h2>Welcome to your profile room @User.Identity.Name</h2>
-@*<text>You are from  @Model.Country, @Model.City</text>*@
 
+<button class="btn btn-primary" id="myWeather">Check my Weather</button>
+<p id="success"></p>
+<p id="error"></p>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function() {
+            $('#myWeather').click(function () {
+                $.ajax({
+                    url: 'http://api.openweathermap.org/data/2.5/weather?q='+'@Model.City'+'&APPID=a431728ee71691e171014a5010f5a08e',
+                    type: 'GET',
+                    success: function(response) {
+                        var tempInCel = (response.main.temp) - 273.15;
+                        var tempInCelRounded = Math.round(tempInCel * 10) / 10;
+                        var pressureInMmhg = Math.round(response.main.pressure * 0.75006);
+                        $('#success').text('Your city is: ' +
+                            response.name +
+                            '.Temperature is ' +
+                            tempInCelRounded +
+                            '*C. Wind blowing with: '+ response.wind.speed + 'm/s. Pressure is'+pressureInMmhg +' H.g.');
+                    },
+                    error: function (jqXHR, exception) {
+                        var msg = '';
+                        if (jqXHR.status === 0) {
+                            msg = 'Not connect.\n Verify Network.';
+                        } else if (jqXHR.status == 404) {
+                            msg = 'Sorry.This city does not in base. [404]';
+                        } else if (jqXHR.status == 500) {
+                            msg = 'Internal Server Error [500].';
+                        } else if (exception === 'parsererror') {
+                            msg = 'Requested JSON parse failed.';
+                        } else if (exception === 'timeout') {
+                            msg = 'Time out error.';
+                        } else if (exception === 'abort') {
+                            msg = 'Ajax request aborted.';
+                        } else {
+                            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                        }
+                        $('#error').html(msg);
+                    }
+                });
+            });
+        });
+    </script>
+}

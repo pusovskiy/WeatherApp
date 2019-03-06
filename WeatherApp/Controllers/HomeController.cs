@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using WeatherApp.Models;
+using WeatherApp.ViewModels;
 
 namespace WeatherApp.Controllers
 {
@@ -10,8 +12,7 @@ namespace WeatherApp.Controllers
     {
         // GET: Home
         public ActionResult Index()
-        {   
-
+        {
             return View();
         }
     }

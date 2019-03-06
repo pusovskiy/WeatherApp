@@ -1,31 +1,8 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Index";
 }
 
 <h2>That's home page.You are welcome.</h2>
 
-<img src="~/Images/logo.png" alt="HOME PAGE"></img>
+<img src="~/Images/logo.png" alt="HOME PAGE"/>
 
-<p id="reply"></p>
-
-@section scripts
-{
-    <script>
-        $(document).ready(function() {
-            $("#myWeather").click(function() {
-                $.get("/Weather/GetWeather",
-                    function(response) {
-                        $.get(response, function(result) {
-                                var tempInCelc = (result.main.temp) - (273.15);
-                                $("#reply").text("Your city is: " +
-                                    result.name +
-                                    ". Your temperature is " +
-                                    tempInCelc +
-                                    "*C.");
-                            });
-                    });
-            });
-        });
-    </script>
-}
