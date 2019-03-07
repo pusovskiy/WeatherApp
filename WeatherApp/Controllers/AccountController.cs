@@ -18,7 +18,7 @@ namespace WeatherApp.Controllers
         }
 
         [HttpPost]
-        public string Login(LoginViewModel model)
+        public ActionResult Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -32,13 +32,17 @@ namespace WeatherApp.Controllers
                 if (user != null)
                 {
                     FormsAuthentication.SetAuthCookie(model.Email, true);
-                    return "You are successfully logged in.Refresh page";
+                    return RedirectToAction("Index","Home");
                 }
 
-                return "Didn't found this user in db.Maybe register first.";
+                ViewBag.HelpMessage = "Wrong user or pw.try another one";
             }
+            else
+            {
 
-            return "Wrong data";
+                ViewBag.HelpMessage = "ValidationError";
+            }
+            return View();
         }
 
         public ActionResult Registration()
@@ -99,7 +103,7 @@ namespace WeatherApp.Controllers
 
                     var userViewModel = new UserViewModel
                     {   
-                        Id = user.Id,
+                        Id = user.UserId,
                         Name = user.Name,
                         Surname = user.Surname,
                         City = user.City,

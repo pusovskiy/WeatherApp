@@ -16,6 +16,10 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Weather in World</a>
                     </li>
+                    @if (User.IsInRole("Admin"))
+                    {   <li><a class="nav-link" href="/Admin/Index">Go to user list</a></li>
+                            
+                    }
                 </ul>
                 <form class="form-inline mt-2 mt-md-0">
                     @Html.Partial("_LoginPartial")

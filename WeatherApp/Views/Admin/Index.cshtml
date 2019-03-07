@@ -43,7 +43,7 @@
             <div class="col-md-2"></div>
             <a class="btn btn-primary" id="deleteBtn" data-bind="attr:{ href: deleteUrl}">Delete User</a>
             <a class="offset-1 btn btn-primary" id="getWeather" href="#" data-bind="click: $root.getWeather">Get user weather</a>
-            <a class="offset-1 btn btn-primary" id="makeAdminBtn" href="#">Make this user admin</a>
+            <a class="offset-1 btn btn-primary" id="makeAdminBtn" data-bind="attr:{ href: makeAdminUrl}">Make this user admin</a>
         </div>
     </div>
     
@@ -61,11 +61,13 @@
                 self.chosenUser = ko.observable();
                 self.jsonUsers = ko.observableArray(@Html.Raw(JsonConvert.SerializeObject(Model)));
                 self.deleteUrl = ko.observable('');
+                self.makeAdminUrl = ko.observable('');
                 self.getWeatherUrl = ko.observable('');
 
                 self.chooseUser = function(user) {
                     self.chosenUser(user);
                     self.deleteUrl('/Admin/DeleteUser?id=' + self.chosenUser().Id);
+                    self.makeAdminUrl('/Admin/MakeUserAdmin?id=' + self.chosenUser().Id);
 
                     self.getWeather = function() {
                         $.ajax({

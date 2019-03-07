@@ -15,9 +15,6 @@ namespace WeatherApp.Models
 
         public ICollection<User> Users { get; set; }
 
-        public Role()
-        {
-            Users = new List<User>();
-        }
+        
     }
 }
