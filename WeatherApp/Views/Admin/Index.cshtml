@@ -10,7 +10,7 @@
 <style>
     .selected {
         color: black;
-        background-color: #235892;
+        background-color: #59a8ff;
     }
 </style>
 
@@ -47,14 +47,16 @@
         </div>
     </div>
     
-    <div id="success" style="margin-top: 15px; color:blue;font-style: italic"></div>
-    <div id="error" style="color: red"></div>
+    <div id="success" style="margin-top: 15px; color:blue;font-style: italic" data-bind="text: weatherInfo"></div>
+    <div id="error" style="color: red" data-bind="text: error"></div>
+    <img data-bind="attr:{src: urlImage}"/>
 </div>
 
 @section scripts
 {
     <script src="~/Scripts/knockout-3.5.0.js" type="text/javascript"></script>
     <script type="text/javascript">
+        window.wind = null;
         $(function() {
             function TableViewModel() {
                 var self = this;
@@ -63,26 +65,58 @@
                 self.deleteUrl = ko.observable('');
                 self.makeAdminUrl = ko.observable('');
                 self.getWeatherUrl = ko.observable('');
+                self.weatherInfo = ko.observable('');
+                self.error = ko.observable('');
+                self.city = ko.observable('');
+                self.temp = ko.observable('');
+                self.wind = ko.observable('');
+                self.pressure = ko.observable('');
+                self.urlImage = ko.observable('');
 
                 self.chooseUser = function(user) {
                     self.chosenUser(user);
                     self.deleteUrl('/Admin/DeleteUser?id=' + self.chosenUser().Id);
                     self.makeAdminUrl('/Admin/MakeUserAdmin?id=' + self.chosenUser().Id);
+                    self.error('');
+                    
 
-                    self.getWeather = function() {
+                    self.getWeather = function getWeather() {
                         $.ajax({
                             url:
-                                'http://api.openweathermap.org/data/2.5/weather?q=' + self.chosenUser().City +'&APPID=a431728ee71691e171014a5010f5a08e',
+                                'http://api.openweathermap.org/data/2.5/weather?q=' +
+                                    self.chosenUser().City +
+                                    '&APPID=a431728ee71691e171014a5010f5a08e',
                             type: 'GET',
                             success: function(response) {
-                                var tempInCel = (response.main.temp) - 273.15;
-                                var tempInCelRounded = Math.round(tempInCel * 10) / 10;
-                                var pressureInMmhg = Math.round(response.main.pressure * 0.75006);
-                                $('#success').text('User city is: ' +
-                                    response.name +
+                                self.city(response.name);
+                                self.temp(Math.round((response.main.temp - 273.15) * 10 / 10));
+                                if (self.temp() > 0) {
+                                    self.urlImage(
+                                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpCEdeB05tId7K1tx7EXYcm5uLc5s8DKbjO6Bh0ivIZw8jMstP');
+                                } else {
+                                    self.urlImage(
+                                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXJv9FO4KUbP17XCQqRephcIjpCeFqojIQEWzbKVe7mMT5UfIAw');
+                                }
+                                self.wind(response.wind.speed);
+                                self.pressure(Math.round(response.main.pressure * 0.75006));
+                                if (window.wind != null) {
+                                    if (window.wind != self.wind()) {
+                                        alert("Wind speed changed. Was "+window.wind+". Now it's " +self.wind());
+                                    };
+                                };
+
+                                window.wind = self.wind();
+
+                                self.weatherInfo('User city is: ' +
+                                    self.city() +
                                     '.Temperature is ' +
-                                    tempInCelRounded +
-                                    '*C. Wind blowing with: '+ response.wind.speed + 'm/s. Pressure is'+pressureInMmhg +' H.g.');
+                                    self.temp() +
+                                    '*C. Wind is blowing with: ' + self.wind() + 
+                                    'm/s. Pressure is ' +
+                                    self.pressure() +
+                                    ' H.g.');
+
+                                setTimeout(getWeather,5000);
                             },
                             error: function(jqXHR, exception) {
                                 var msg = '';
@@ -101,15 +135,11 @@
                                 } else {
                                     msg = 'Uncaught Error.\n' + jqXHR.responseText;
                                 }
-                                $('#error').html(msg);
+                                self.error(msg);
                             }
                         });
                     }
                 };
-
-                
-
-
             };
 
             var tableViewModel = new TableViewModel();
