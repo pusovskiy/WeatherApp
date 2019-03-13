@@ -114,5 +114,39 @@ namespace WeatherApp.Controllers
 
             }
         }
+
+      
+        public string ReturnCityAbbr(string fullName)
+        {
+            Dictionary<string, string> CityDictionary = new Dictionary<string, string>
+            {
+                { "Belarus","BY"},
+                { "Russia","RU"},
+                { "Germany","DE"},
+                { "Netherland","NL"},
+                { "Great Britain","GB"},
+                { "France","FR"},
+                { "Belgium","BE"},
+                { "Japan","JP"},
+                { "Latvia","LV"},
+                { "Italy","IT"},
+                { "Portugal","PT"},
+                { "Ukraine","UA"},
+                { "Kazakhstan","KZ"},
+                { "United States","US"},
+                { "Poland","PL"}
+
+            };
+
+            if (CityDictionary.ContainsKey(fullName))
+            {
+                var city = CityDictionary[fullName];
+                return city;
+            }
+            else
+            { 
+                return "error";
+            }
+        }
     }
 }

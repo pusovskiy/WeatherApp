@@ -49,7 +49,7 @@
     
     <div id="success" style="margin-top: 15px; color:blue;font-style: italic" data-bind="text: weatherInfo"></div>
     <div id="error" style="color: red" data-bind="text: error"></div>
-    <img data-bind="attr:{src: urlImage}"/>
+    <img class="rounded mx-auto d-block" data-bind="attr:{src: urlImage}"/>
 </div>
 
 @section scripts
@@ -90,20 +90,10 @@
                             success: function(response) {
                                 self.city(response.name);
                                 self.temp(Math.round((response.main.temp - 273.15) * 10 / 10));
-                                if (self.temp() > 0) {
-                                    self.urlImage(
-                                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpCEdeB05tId7K1tx7EXYcm5uLc5s8DKbjO6Bh0ivIZw8jMstP');
-                                } else {
-                                    self.urlImage(
-                                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXJv9FO4KUbP17XCQqRephcIjpCeFqojIQEWzbKVe7mMT5UfIAw');
-                                }
+                                chooseImg();
                                 self.wind(response.wind.speed);
                                 self.pressure(Math.round(response.main.pressure * 0.75006));
-                                if (window.wind != null) {
-                                    if (window.wind != self.wind()) {
-                                        alert("Wind speed changed. Was "+window.wind+". Now it's " +self.wind());
-                                    };
-                                };
+                                compareWind();
 
                                 window.wind = self.wind();
 
@@ -115,6 +105,24 @@
                                     'm/s. Pressure is ' +
                                     self.pressure() +
                                     ' H.g.');
+
+                                function compareWind() {
+                                    if (window.wind != null) {
+                                        if (window.wind != self.wind()) {
+                                            alert("Wind speed changed. Was "+window.wind+". Now it's " +self.wind());
+                                        };
+                                    };
+                                }
+
+                                function chooseImg() {
+                                    if (self.temp() > 0) {
+                                    self.urlImage(
+                                         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpCEdeB05tId7K1tx7EXYcm5uLc5s8DKbjO6Bh0ivIZw8jMstP');
+                                } else {
+                                    self.urlImage(
+                                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvXJv9FO4KUbP17XCQqRephcIjpCeFqojIQEWzbKVe7mMT5UfIAw');
+                                }
+                                }
 
                                 setTimeout(getWeather,5000);
                             },

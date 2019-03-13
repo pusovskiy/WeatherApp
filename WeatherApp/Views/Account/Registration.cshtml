@@ -3,10 +3,15 @@
 @{
     ViewBag.Title = "Registration";
 }
+@section styles
+{
+    <link href="~/Content/Animation.css" rel="stylesheet"/>
+}
 
 <h2>Registration</h2>
 <hr/>
 
+@*<div class="lds-dual-ring"></div>*@
 
 @using (Html.BeginForm())
 {
@@ -56,16 +61,19 @@
         <div class="form-group">
             <label class="control-label col-md-3">Country</label>
             <div class="col-md-10">
-                <input class="form-control" name="Country" id="Country"/>
-                @Html.ValidationMessageFor(m => m.Country, "", new {@class = "text-danger"})
+                <input class="form-control" name="Country" id="Country" data-bind='value:country, valueUpdate:"afterkeydown"' />
+                <div data-bind="attr:{ class: className}"></div>
+                <div style="color: red" data-bind="text: error"></div>
+                @Html.ValidationMessageFor(m => m.Country, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label col-md-3">City</label>
             <div class="col-md-10">
-                <input class="form-control" name="City" id="City"/>
+               <select class="custom-select" name="City" data-bind="options: cities"></select>
                 @Html.ValidationMessageFor(m => m.City, "", new {@class = "text-danger"})
+                
             </div>
         </div>
 
@@ -75,9 +83,74 @@
                 <input type="submit" id="submit_btn" value="Register" class="btn btn-primary"/>
             </div>
         </div>
-
+        
 
     </div>
 }
 
+@section scripts
+{
+    <script src="~/Scripts/knockout-3.5.0.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function() {
+            window.allCities = [];
+            $.ajax({
+                url: "/cities.json",
+                type: "GET",
+                success: function(response) {
+                    var respMap = response.map(({ name, country }) => ({ name, country }));
+                    for (var r in respMap) {
+                        window.allCities.push(respMap[r]);
+                    };
+                }
+            });
 
+            function RegisterViewModel() {
+                var self = this;
+                self.country = ko.observable();
+                self.abbr = ko.observable('');
+                self.cities = ko.observableArray('');
+                self.error = ko.observable('');
+                self.className = ko.observable('');
+
+                self.comp = ko.computed(self.country).extend({ throttle: 1000 });
+
+                self.comp.subscribe(function(val) {
+                        if (val !== "") {
+                            self.className('lds-dual-ring');
+                            $.ajax({
+                                url: "/Account/ReturnCityAbbr?fullName=" + val,
+                                type: "GET",
+                                success: function(abbr) {
+                                    if (abbr == "error") {
+                                        self.error('Choose other city.This city does not in database');
+                                        self.cities([]);
+                                        self.className('');
+                                    } else {
+                                        self.abbr(abbr);
+                                        self.cities([]);
+                                        self.error('');
+                                       
+                                        for (var city in allCities) {
+                                            if (window.allCities[city].country == abbr) {
+                                                self.cities.push(window.allCities[city].name);
+                                            }
+                                            
+                                        };
+                                        self.className('');
+                                    };
+                                    self.cities.sort();
+                                }
+
+                            })
+                        }
+                    },
+                    self);
+
+            };
+
+            var registerViewModel = new RegisterViewModel();
+            ko.applyBindings(registerViewModel);
+        });
+    </script>
+}

@@ -9,7 +9,6 @@ namespace WeatherApp.ViewModels
     public class RegistrationViewModel
     {   
         [Required]
-        [StringLength(10,ErrorMessage = "errrerer")]
         public string Name { get; set; }
         [Required]
         public string Surname { get; set; }
