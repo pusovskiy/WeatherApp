@@ -123,7 +123,7 @@ namespace WeatherApp.Controllers
                 { "Belarus","BY"},
                 { "Russia","RU"},
                 { "Germany","DE"},
-                { "Netherland","NL"},
+                { "Netherlands","NL"},
                 { "Great Britain","GB"},
                 { "France","FR"},
                 { "Belgium","BE"},

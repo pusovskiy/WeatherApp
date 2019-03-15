@@ -127,9 +127,10 @@
                                         self.cities([]);
                                         self.className('');
                                     } else {
+
+                                        self.error('');
                                         self.abbr(abbr);
                                         self.cities([]);
-                                        self.error('');
                                        
                                         for (var city in allCities) {
                                             if (window.allCities[city].country == abbr) {

@@ -16,7 +16,6 @@ namespace WeatherApp.Controllers
         {
             using (UserContext db = new UserContext())
             {
-                
                 var users = db.Users.ToList();
 
                 var usersViewModels = new List<UserViewModel>();
@@ -32,7 +31,7 @@ namespace WeatherApp.Controllers
                         City = user.City
                     });
                 }
-
+                
                 return View(usersViewModels);
             }
         }

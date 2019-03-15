@@ -11,20 +11,17 @@
     .selected {
         color: black;
         background-color: #59a8ff;
+
     }
 </style>
 
 <table class="table col-md-10 table-bordered">
     <thead>
-        <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Surname</th>
-            <th>Country</th>
-            <th>City</th>
-        </tr>
+    <tr data-bind="foreach: tableHead">
+        <th data-bind="text: $data,click: $root.sortArray,css:{ selected: $parent.chosenHead() && $data === $parent.chosenHead() }"></th>
+    </tr>
     </thead>
-    <tbody data-bind="foreach: jsonUsers">
+    <tbody data-bind="foreach: jsonUsers.pagedItems">
     <tr data-bind="click: $root.chooseUser, css: { selected: $parent.chosenUser() && Id === $parent.chosenUser().Id }">
         <td data-bind="text: Id"></td>
         <td data-bind="text: Name"></td>
@@ -32,9 +29,30 @@
         <td data-bind="text: Country"></td>
         <td data-bind="text: City"></td>
     </tr>
-  
+
     </tbody>
 </table>
+
+<div class="container-fluid text-center">
+    <span data-bind="text: jsonUsers.currentStatus"></span>
+    <br/>
+    <br/>
+    <ul class="pagination justify-content-center">
+        <li class="page-item" data-bind="css: { disabled: jsonUsers.currentPageIndex() === 0 }">
+            <a class="page-link" href="#" data-bind="click: jsonUsers.previousPage">&laquo;</a>
+        </li>
+        <ul class="pagination" data-bind="foreach: jsonUsers.allPages">
+            <li class="page-item" data-bind="css: { active: pageNumber === ($root.jsonUsers.currentPageIndex() + 1) }">
+                <a class="page-link" href="#" data-bind="text: pageNumber, click: $root.jsonUsers.moveToPage(pageNumber-1)"></a>
+            </li>
+        </ul>
+        <ul class="pagination">
+            <li class="page-item" data-bind="css: { disabled: jsonUsers.currentPageIndex() === jsonUsers.maxPageIndex() }">
+                <a class="page-link" href="#" data-bind="click: jsonUsers.nextPage">&raquo;</a>
+            </li>
+        </ul>
+    </ul>
+</div>
 
 
 <div class="container-fluid">
@@ -46,10 +64,10 @@
             <a class="offset-1 btn btn-primary" id="makeAdminBtn" data-bind="attr:{ href: makeAdminUrl}">Make this user admin</a>
         </div>
     </div>
-    
+
     <div id="success" style="margin-top: 15px; color:blue;font-style: italic" data-bind="text: weatherInfo"></div>
     <div id="error" style="color: red" data-bind="text: error"></div>
-    <img class="rounded mx-auto d-block" data-bind="attr:{src: urlImage}"/>
+    <img class="rounded mx-auto d-block" data-bind="attr:{src: urlImage}" />
 </div>
 
 @section scripts
@@ -57,11 +75,86 @@
     <script src="~/Scripts/knockout-3.5.0.js" type="text/javascript"></script>
     <script type="text/javascript">
         window.wind = null;
-        $(function() {
+        $(function () {
+
+            ko.observableArray.fn.paged = function (perPage, sortComparator) {
+                var items = this;
+
+                items.currentPage = ko.observable();
+                items.pageSize = ko.observable(perPage);
+                items.currentPageIndex = ko.observable(0);
+
+                items.currentItemPage = ko.computed(function () {
+                    var pagesize = parseInt(items.pageSize(), 10),
+                        startIndex = pagesize * items.currentPageIndex(),
+                        endIndex = startIndex + pagesize;
+                    return this().slice(startIndex, endIndex);
+                }, items);
+
+                items.pagedItems = ko.computed(function () {
+                    var size = parseInt(items.pageSize(), 10),
+                        start = items.currentPageIndex() * size;
+
+                    if (typeof (sortComparator) === "function") {
+                        var sorted = this().sort(sortComparator);
+                        return sorted.slice(start, start + size);
+                    } else {
+                        return this().slice(start, start + size);
+                    }
+
+
+                }, items);
+
+                items.maxPageIndex = ko.computed(function () {
+                    return Math.ceil(this().length / items.pageSize()) - 1;
+                }, items);
+
+                items.allPages = ko.computed(function () {
+                    var pages = [];
+                    for (var i = 0; i <= items.maxPageIndex(); i++) {
+                        pages.push({ pageNumber: (i + 1) });
+                    }
+                    return pages;
+                }, items);
+
+                items.currentStatus = ko.computed(function () {
+                    var pagesize = parseInt(items.pageSize(), 10),
+                        start = pagesize * items.currentPageIndex(),
+                        end = start + pagesize;
+
+                    if (items.currentPageIndex() === items.maxPageIndex()) end = this().length;
+
+                    return 'Showing ' + (start + 1) + ' to ' + end + ' of ' + this().length;
+                }, items);
+
+                items.nextPage = function () {
+                    if (((items.currentPageIndex() + 1) * items.pageSize()) < items().length) {
+                        items.currentPageIndex(items.currentPageIndex() + 1);
+                    } else {
+                        items.currentPageIndex(0);
+                    }
+                };
+
+                items.previousPage = function () {
+                    if (items.currentPageIndex() > 0) {
+                        items.currentPageIndex(items.currentPageIndex() - 1);
+                    } else {
+                        items.currentPageIndex((Math.ceil(items().length / items.pageSize())) - 1);
+                    }
+                };
+
+                items.moveToPage = function (index) {
+                    items.currentPageIndex(index);
+                };
+
+                return items;
+            };
+
             function TableViewModel() {
                 var self = this;
                 self.chosenUser = ko.observable();
-                self.jsonUsers = ko.observableArray(@Html.Raw(JsonConvert.SerializeObject(Model)));
+                self.chosenHead = ko.observable();
+                self.jsonUsers = ko.observableArray(@Html.Raw(JsonConvert.SerializeObject(Model))).paged(5);
                 self.deleteUrl = ko.observable('');
                 self.makeAdminUrl = ko.observable('');
                 self.getWeatherUrl = ko.observable('');
@@ -72,12 +165,25 @@
                 self.wind = ko.observable('');
                 self.pressure = ko.observable('');
                 self.urlImage = ko.observable('');
+                self.tableHead = ko.observableArray(["Id","Name","Surname","Country","City"]);
 
-                self.chooseUser = function(user) {
+
+
+                self.sortArray = function (head) {
+                    self.chosenHead(head);
+                    self.jsonUsers.sort(function (left, right) {
+                        return left[head] === right[head] ? 0
+                            : left[head] < right[head] ? -1
+                                : 1;
+                    });
+                };
+
+                self.chooseUser = function (user) {
                     self.chosenUser(user);
                     self.deleteUrl('/Admin/DeleteUser?id=' + self.chosenUser().Id);
                     self.makeAdminUrl('/Admin/MakeUserAdmin?id=' + self.chosenUser().Id);
                     self.error('');
+
                     
 
                     self.getWeather = function getWeather() {
@@ -101,7 +207,7 @@
                                     self.city() +
                                     '.Temperature is ' +
                                     self.temp() +
-                                    '*C. Wind is blowing with: ' + self.wind() + 
+                                    '*C. Wind is blowing with: ' + self.wind() +
                                     'm/s. Pressure is ' +
                                     self.pressure() +
                                     ' H.g.');
@@ -113,6 +219,8 @@
                                         };
                                     };
                                 }
+
+
 
                                 function chooseImg() {
                                     if (self.temp() > 0) {
@@ -148,6 +256,8 @@
                         });
                     }
                 };
+
+
             };
 
             var tableViewModel = new TableViewModel();
