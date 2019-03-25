@@ -5,6 +5,10 @@
 }
 
 <h2>Welcome to your profile room @User.Identity.Name</h2>
+@if (User.IsInRole("Admin"))
+{
+    <h3>You have admin roots. You can manage users(Go to users list)</h3>
+}
 
 <button class="btn btn-primary" id="myWeather">Check my Weather</button>
 <p id="success" style="margin-top: 15px; color:blue;font-style: italic"></p>

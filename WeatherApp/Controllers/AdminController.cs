@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.UI;
 using WeatherApp.Models;
 using WeatherApp.ViewModels;
 
 namespace WeatherApp.Controllers
-{   
+{
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {   
